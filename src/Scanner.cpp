@@ -2,32 +2,44 @@
 // Created by Adam Ali on 16/01/2023.
 //
 
+#include <vector>
 #include "Scanner.h"
 
 Token Scanner::readNumber() {
     bool digitFlag = false;
     bool decimalFlag = false;
 
-    while (m_current != m_end) {
-        char c = *m_current;
+    // Temporary start for the token
+    const char* start = m_current;
 
-        if (c == '.') {
+    std::string value = "";
+
+    // Check if the first character is a digit or a decimal
+    while(m_current != m_end) {
+        if (*m_current == '.') {
             if (decimalFlag) {
-                return Token::Invalid;
+                return {TokenType::Invalid};
             }
             decimalFlag = true;
-        } else if (c >= '0' && c <= '9') {
+            value += *m_current;
+            ++m_current;
+        } else if (isdigit(*m_current)) {
             digitFlag = true;
+            value += *m_current;
+            ++m_current;
         } else {
             break;
         }
     }
 
-    if (digitFlag) {
-        return Token::Number;
+    if (!digitFlag) {
+        return {TokenType::Invalid};
     }
 
-    return Token::Number;
+    char* c_value = new char[value.length() + 1];
+    strcpy(c_value, value.c_str());
+
+    return {TokenType::Number, c_value};
 }
 
 Token Scanner::read() {
@@ -38,7 +50,7 @@ Token Scanner::read() {
 
     // Check if we've reached the end of the file
     if (m_current == m_end) {
-        return Token::EndOfFile;
+        return {TokenType::EndOfFile};
     }
 
     char c = *m_current;
@@ -46,39 +58,45 @@ Token Scanner::read() {
     // Operators
     if ('+' == c) {
         ++m_current;
-        return Token::Add;
+        return {TokenType::Add};
     }
     if ('-' == c) {
         ++m_current;
-        return Token::Subtract;
+        return {TokenType::Subtract};
     }
     if ('*' == c) {
         ++m_current;
-        return Token::Multiply;
+        return {TokenType::Multiply};
     }
     if ('/' == c) {
         ++m_current;
-        return Token::Divide;
+        return {TokenType::Divide};
     }
     // Parentheses
     if ('(' == c) {
         ++m_current;
-        return Token::LeftParen;
+        return {TokenType::LeftParen};
     }
     if (')' == c) {
         ++m_current;
-        return Token::RightParen;
+        return {TokenType::RightParen};
     }
 
     // Check if we're reading a number
     if ('.' == c || isdigit(c)) {
-        // read the whole number
-        while (m_current != m_end && (isdigit(*m_current) || '.' == *m_current)) {
-            ++m_current;
-        }
-
-        return Token::Number;
+        return readNumber();
     }
 
-    return Token::Invalid;
+    return {TokenType::Invalid};
+}
+
+std::vector<Token> Scanner::getTokens() {
+    std::vector<Token> tokens;
+    Token token = Token(TokenType::Invalid);
+
+    while ((token = read()).getType() != TokenType::EndOfFile && token.getType() != TokenType::Invalid) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
 }
