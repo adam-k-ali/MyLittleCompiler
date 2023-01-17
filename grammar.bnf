@@ -5,4 +5,14 @@ expression ::= number
             | expression '-' expression
             ;
 
-number ::= T_INT;
+addition_expression ::= multiplication_expression
+                      | addition_expression '+' multiplication_expression
+                      | addition_expression '-' multiplication_expression
+                      ;
+
+multiplication_expression ::= number
+                            | number '*' multiplication_expression
+                            | number '/' multiplication_expression
+                            ;
+
+number ::= T_INT | T_DOUBLE;

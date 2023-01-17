@@ -47,10 +47,16 @@ private:
     struct ASTNode* parseLiteral();
 
     /**
-     * Parses a binary expression
-     * @return The ASTNode for the binary expression
+     * Parses an addition expression
+     * @return The ASTNode for the addition expression
      */
-    struct ASTNode* parseBinary();
+     struct ASTNode* parseAddition();
+
+     /**
+      * Parses a multiplication expression
+      * @return The ASTNode for the multiplication expression
+      */
+      struct ASTNode* parseMultiplication();
 
 public:
     explicit Parser(const std::vector<Token> tokens) : tokens(tokens) {};
