@@ -4,6 +4,18 @@
 
 #include "Parser.h"
 
+std::map<TokenType, int> Parser::OpPrec = {
+        {TokenType::Invalid, 0},
+        {TokenType::EndOfFile, 0},
+
+        {TokenType::Number, 0},
+
+        {TokenType::Add, 10},
+        {TokenType::Minus, 10},
+        {TokenType::Star, 20},
+        {TokenType::Slash, 20},
+};
+
 Token Parser::previous() {
     return tokens[current - 1];
 }
@@ -65,11 +77,32 @@ struct ASTNode* Parser::parse() {
         if (tokens.empty()) {
             throw ParseError({TokenType::Invalid}, "No tokens to parse");
         }
-        return parseAddition();
+        return parseBinary();
     } catch (ParseError &error) {
         std::cout << error.what() << std::endl;
         return nullptr;
     }
+}
+
+struct ASTNode *Parser::parseBinary() {
+    int prevPrec = getPrecedence(previous().getType());
+
+    struct ASTNode *left, *right;
+
+    left = parseLiteral();
+    if (isAtEnd()) {
+        return left;
+    }
+
+    while (getPrecedence(peek().getType()) > prevPrec) {
+        Token token = advance();
+        right = parseBinary();
+        left = new ASTNode(token.getType(), Types::Operator, left, right);
+        if (isAtEnd()) {
+            return left;
+        }
+    }
+    return left;
 }
 
 struct ASTNode *Parser::parseLiteral() {
@@ -79,53 +112,4 @@ struct ASTNode *Parser::parseLiteral() {
     }
 
     throw ParseError(peek(), "Expected expression");
-}
-
-struct ASTNode *Parser::parseAddition() {
-    struct ASTNode *left, *right;
-    // Get left-subtree as precedence
-    left = parseMultiplication();
-    // If we're at the end of the expression, return the left node
-    if (isAtEnd()) {
-        return left;
-    }
-
-    // Check if the next token is a binary operator
-    while (match({TokenType::Add, TokenType::Minus})) {
-        TokenType type = previous().getType();
-        // Set the right node as the right child
-        right = parseMultiplication();
-
-        left = new ASTNode(type, nullptr, Types::Operator, left, right);
-
-        if (isAtEnd()) {
-            break;
-        }
-    }
-
-    return left;
-}
-
-struct ASTNode *Parser::parseMultiplication() {
-    struct ASTNode *left, *right;
-
-    left = parseLiteral();
-    // If we're at the end of the expression, return the left node
-    if (isAtEnd()) {
-        return left;
-    }
-
-    // Check if the next token is a binary operator
-    while (match({TokenType::Star, TokenType::Slash})) {
-        TokenType type = previous().getType();
-
-        right = parseLiteral();
-
-        left = new ASTNode(type, nullptr, Types::Operator, left, right);
-        if (isAtEnd()) {
-            break;
-        }
-    }
-
-    return left;
 }

@@ -87,9 +87,9 @@ struct ASTNode {
     }
 
     // Build a generic AST node
-    ASTNode(TokenType type, void* value, Types dtype, ASTNode* left, ASTNode* right) {
+    ASTNode(TokenType type, Types dtype, ASTNode* left, ASTNode* right) {
         this->type = type;
-        this->value = value;
+        this->value = nullptr;
         this->dtype = dtype;
         this->left = left;
         this->right = right;

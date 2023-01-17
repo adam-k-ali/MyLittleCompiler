@@ -25,6 +25,12 @@ public:
 
 class Parser {
 private:
+    static std::map<TokenType, int> OpPrec;
+
+    static int getPrecedence(TokenType type) {
+        return OpPrec.at(type);
+    }
+
     const std::vector<Token> tokens;
 
     size_t current = 0;
@@ -47,16 +53,11 @@ private:
     struct ASTNode* parseLiteral();
 
     /**
-     * Parses an addition expression
-     * @return The ASTNode for the addition expression
+     * Parses a binary expression
+     * @return The AST node for the binary expression
      */
-     struct ASTNode* parseAddition();
+     struct ASTNode* parseBinary();
 
-     /**
-      * Parses a multiplication expression
-      * @return The ASTNode for the multiplication expression
-      */
-      struct ASTNode* parseMultiplication();
 
 public:
     explicit Parser(const std::vector<Token> tokens) : tokens(tokens) {};
