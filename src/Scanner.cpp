@@ -5,6 +5,21 @@
 #include <vector>
 #include "Scanner.h"
 
+
+int Scanner::skip() {
+    int count = 0;
+    std::vector<char> skipChars = {' ', '\t', '\n', '\r', '\f'};
+    while(m_current != m_end) {
+        if (std::find(skipChars.begin(), skipChars.end(), *m_current) != skipChars.end()) {
+            ++m_current;
+            ++count;
+        } else {
+            break;
+        }
+    }
+    return count;
+}
+
 Token Scanner::readNumber() {
     bool digitFlag = false;
     bool decimalFlag = false;
@@ -42,18 +57,28 @@ Token Scanner::readNumber() {
     return {TokenType::Number, c_value};
 }
 
-int Scanner::skip() {
-    int count = 0;
-    std::vector<char> skipChars = {' ', '\t', '\n', '\r', '\f'};
+Token Scanner::readIdentifier() {
+    int i = 0;
+    std::string value = "";
     while(m_current != m_end) {
-        if (std::find(skipChars.begin(), skipChars.end(), *m_current) != skipChars.end()) {
-            ++m_current;
-            ++count;
-        } else {
+        if (!isalnum(*m_current) && *m_current != '_') {
             break;
         }
+        value += *m_current;
+        ++m_current;
     }
-    return count;
+    char* c_value = new char[value.length() + 1];
+    strcpy(c_value, value.c_str());
+    return {TokenType::Identifier, c_value};
+}
+
+Token Scanner::readKeyword(Token token) {
+    int i = 0;
+    char* tokenValue = token.getValue();
+    if (strcmp(tokenValue, "print") == 0) {
+        return {TokenType::Print};
+    }
+    return token;
 }
 
 Token Scanner::read() {
@@ -82,13 +107,22 @@ Token Scanner::read() {
         case '/':
             ++m_current;
             return {TokenType::Slash};
+        case ';':
+            ++m_current;
+            return {TokenType::SemiColon};
         default:
+            // Check if the character is a digit, if so, read a number
             if (isdigit(c)) {
                 return readNumber();
-            } else {
-                return {TokenType::Invalid};
+            }
+
+            // Check if the character is a letter, if so, read an identifier
+            if(isalpha(c) || c == '_') {
+                Token tok = readIdentifier();
+                return readKeyword(tok);
             }
     }
+    return {TokenType::Invalid};
 }
 
 std::vector<Token> Scanner::getTokens() {

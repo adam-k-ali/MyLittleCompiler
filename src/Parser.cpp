@@ -4,23 +4,21 @@
 
 #include "Parser.h"
 
-std::map<TokenType, int> Parser::OpPrec = {
-        {TokenType::Invalid,   0},
-        {TokenType::EndOfFile, 0},
+#include <utility>
 
-        {TokenType::Number,    0},
 
-        {TokenType::Plus,      10},
-        {TokenType::Minus,     10},
-        {TokenType::Star,      20},
-        {TokenType::Slash,     20},
-};
 
 Token Parser::previous() {
+    if (current == 0) {
+        return {TokenType::Invalid};
+    }
     return tokens[current - 1];
 }
 
 Token Parser::peek() {
+    if(tokens.size() <= current) {
+        return {TokenType::EndOfFile};
+    }
     return tokens.at(current);
 }
 
@@ -42,8 +40,7 @@ Token Parser::consume(TokenType type, std::string message) {
     if (check(type)) {
         return advance();
     }
-
-    throw ParseError(peek(), message);
+    throw ParseError(peek(), std::move(message));
 }
 
 
@@ -77,7 +74,7 @@ struct ASTNode* Parser::parse() {
         if (tokens.empty()) {
             throw ParseError({TokenType::Invalid}, "No tokens to parse");
         }
-        return parseBinary();
+        return parseStatement();
     } catch (ParseError &error) {
         std::cout << error.what() << std::endl;
         return nullptr;
@@ -98,7 +95,7 @@ struct ASTNode *Parser::parseBinary() {
         Token token = advance();
         right = parseBinary();
         left = new ASTNode(token.getType(), Types::Operator, left, right);
-        if (isAtEnd()) {
+        if (isAtEnd() || peek().getType() == TokenType::SemiColon) {
             return left;
         }
     }
@@ -112,4 +109,14 @@ struct ASTNode *Parser::parseLiteral() {
     }
 
     throw ParseError(peek(), "Expected expression");
+}
+
+struct ASTNode *Parser::parseStatement() {
+    struct ASTNode *root, *left;
+    if (match({TokenType::Print})) {
+        left = parseBinary();
+        root = new ASTNode(TokenType::Print, Types::Operator, left, nullptr);
+        consume(TokenType::SemiColon, "Expected ';' after expression");
+        return root;
+    }
 }

@@ -9,6 +9,7 @@
 #include <vector>
 #include "Token.h"
 #include "Scanner.h"
+#include "defs.h"
 
 class ParseError : public std::exception {
 private:
@@ -25,8 +26,6 @@ public:
 
 class Parser {
 private:
-    static std::map<TokenType, int> OpPrec;
-
     static int getPrecedence(TokenType type) {
         return OpPrec.at(type);
     }
@@ -58,6 +57,11 @@ private:
      */
      struct ASTNode* parseBinary();
 
+     /**
+      * Parse a statement
+      * @return The AST node for the statement
+      */
+     struct ASTNode* parseStatement();
 
 public:
     explicit Parser(const std::vector<Token> tokens) : tokens(tokens) {};

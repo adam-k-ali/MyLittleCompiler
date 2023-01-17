@@ -19,26 +19,20 @@ enum class Types {
 enum class TokenType {
     Invalid,
     EndOfFile,
+    SemiColon,
 
     // Literals
     Number,
+    Identifier,
+
+    // Keywords
+    Print,
 
     // Operators
     Plus,
     Minus,
     Star,
     Slash,
-};
-
-// Create map of token types to their string representation
-const std::map<TokenType, std::string> tokenToName = {
-        {TokenType::Invalid,   "Invalid"},
-        {TokenType::EndOfFile, "EndOfFile"},
-        {TokenType::Number,    "Number"},
-        {TokenType::Plus,      "Plus"},
-        {TokenType::Minus,     "Minus"},
-        {TokenType::Star,      "Star"},
-        {TokenType::Slash,     "Slash"},
 };
 
 struct ASTNode {

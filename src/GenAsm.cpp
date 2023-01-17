@@ -62,6 +62,9 @@ int GenAsm::genAst(struct ASTNode *node) {
             return cgmul(leftreg, rightreg);
         case TokenType::Slash:
             return cgdiv(leftreg, rightreg);
+        case TokenType::Print:
+            cgprintint(leftreg);
+            break;
         default:
             fprintf(stderr, "Unknown AST operator %d", node->type);
             exit(1);

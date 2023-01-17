@@ -15,7 +15,7 @@ private:
 
     int skip();
 
-    Token readKeyword();
+    static Token readKeyword(Token token);
     Token readIdentifier();
 
     Token readNumber();
