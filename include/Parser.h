@@ -63,6 +63,10 @@ private:
       */
      struct ASTNode* parseStatement();
 
+     struct ASTNode* parsePrintStmt();
+     struct ASTNode* parseVarDeclStmt();
+        struct ASTNode* parseAssignmentStmt();
+
 public:
     explicit Parser(const std::vector<Token> tokens) : tokens(tokens) {};
 

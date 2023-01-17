@@ -16,7 +16,15 @@ multiplication_expression ::= number
                             ;
 
 
-statements ::= statement | statement statements;
-statement ::= 'print' expression ';'
+statements ::= statement
+      | statement statements
+      ;
 
-number ::= T_INT | T_DOUBLE;
+statement ::= 'print' expression ';'
+          | 'int' identifier ';'
+          | identifier '=' expression ';'
+          ;
+
+identifier::= T_IDENTIFIER;
+
+number ::= T_INT;

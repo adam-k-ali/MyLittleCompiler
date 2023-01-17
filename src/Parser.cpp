@@ -40,6 +40,7 @@ Token Parser::consume(TokenType type, std::string message) {
     if (check(type)) {
         return advance();
     }
+
     throw ParseError(peek(), std::move(message));
 }
 
@@ -94,7 +95,7 @@ struct ASTNode *Parser::parseBinary() {
     while (getPrecedence(peek().getType()) > prevPrec) {
         Token token = advance();
         right = parseBinary();
-        left = new ASTNode(token.getType(), Types::Operator, left, right);
+        left = new ASTNode(token.getType(), Types::Void, left, right);
         if (isAtEnd() || peek().getType() == TokenType::SemiColon) {
             return left;
         }
@@ -113,10 +114,55 @@ struct ASTNode *Parser::parseLiteral() {
 
 struct ASTNode *Parser::parseStatement() {
     struct ASTNode *root, *left;
-    if (match({TokenType::Print})) {
+    if (match({TokenType::Print, TokenType::Int, TokenType::Identifier})) {
+        Token token = previous();
+        switch (token.getType()) {
+            case TokenType::Print:
+                left = parseLiteral();
+                break;
+            case TokenType::Int:
+                left = parseDeclaration();
+                break;
+            case TokenType::Identifier:
+                left = parseAssignment();
+                break;
+        }
         left = parseBinary();
-        root = new ASTNode(TokenType::Print, Types::Operator, left, nullptr);
+        root = new ASTNode(TokenType::Print, Types::Void, left, nullptr);
         consume(TokenType::SemiColon, "Expected ';' after expression");
         return root;
     }
+}
+
+
+struct ASTNode *Parser::parseVarDeclStmt() {
+    // int foo = 5;
+    // The next token should be the identifier
+    Token identifier = consume(TokenType::Identifier, "Expected identifier after 'int'");
+    // The next token should be the equals sign
+    consume(TokenType::Assign, "Expected '=' after identifier");
+    // The next token should be the value
+    Token value = consume(TokenType::Number, "Expected value after '='");
+    // The next token should be the semicolon
+    consume(TokenType::SemiColon, "Expected ';' after value");
+    ASTNode* identifierNode = new ASTNode(identifier.getType(), identifier.getValue(), Types::String);
+    ASTNode* valueNode = new ASTNode(value.getType(), new double(std::stod(value.getValue())), Types::Double);
+    return new ASTNode(TokenType::Int, Types::Void, identifierNode, valueNode);
+}
+
+struct ASTNode *Parser::parsePrintStmt() {
+    struct ASTNode *root, *left;
+    left = parseBinary();
+    root = new ASTNode(TokenType::Print, Types::Void, left, nullptr);
+    consume(TokenType::SemiColon, "Expected ';' after expression");
+    return root;
+}
+
+struct ASTNode *Parser::parseAssignmentStmt() {
+    struct ASTNode *root, *left, *right;
+    Token identifier = previous();
+    consume(TokenType::Assign, "Expected '=' after identifier");
+    left = parseBinary();
+    root = new ASTNode(TokenType::Assign, Types::Void, left, nullptr);
+    return root;
 }

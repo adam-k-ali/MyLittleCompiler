@@ -20,7 +20,7 @@ private:
 
         result += "(";
         // If the node is an operator, print the operator
-        if (root->dtype == Types::Operator) {
+        if (root->dtype == Types::Void) {
             if (TokenToName.find(root->type) != TokenToName.end()) {
                 result += TokenToName.at(root->type);
             } else {

@@ -7,33 +7,7 @@
 
 #include <string>
 #include <map>
-
-enum class Types {
-    Nil,
-    Bool,
-    Double,
-    String,
-    Operator
-};
-
-enum class TokenType {
-    Invalid,
-    EndOfFile,
-    SemiColon,
-
-    // Literals
-    Number,
-    Identifier,
-
-    // Keywords
-    Print,
-
-    // Operators
-    Plus,
-    Minus,
-    Star,
-    Slash,
-};
+#include "defs.h"
 
 struct ASTNode {
     TokenType type;

@@ -1,1 +1,5 @@
-print 5 * 5 + 3 / 2 - 7;
+int fred;
+int jim;
+fred = 5;
+jim = 12;
+print fred + jim;

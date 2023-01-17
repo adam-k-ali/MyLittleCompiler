@@ -78,7 +78,10 @@ Token Scanner::readKeyword(Token token) {
     if (strcmp(tokenValue, "print") == 0) {
         return {TokenType::Print};
     }
-    return token;
+    if (strcmp(tokenValue, "int") == 0) {
+        return {TokenType::Int};
+    }
+    return {TokenType::Invalid};
 }
 
 Token Scanner::read() {
@@ -119,7 +122,13 @@ Token Scanner::read() {
             // Check if the character is a letter, if so, read an identifier
             if(isalpha(c) || c == '_') {
                 Token tok = readIdentifier();
-                return readKeyword(tok);
+                Token keyword = readKeyword(tok);
+                // If the token is a keyword, return the keyword token
+                if (keyword.getType() != TokenType::Invalid) {
+                    return keyword;
+                }
+                // Otherwise, the token is an identifier
+                return tok;
             }
     }
     return {TokenType::Invalid};
