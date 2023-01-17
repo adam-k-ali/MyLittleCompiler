@@ -60,115 +60,53 @@ bool Parser::isAtEnd() {
     return peek().getType() == TokenType::EndOfFile;
 }
 
-Expr *Parser::parse() {
+struct ASTNode* Parser::parse() {
     try {
         if (tokens.empty()) {
             throw ParseError({TokenType::Invalid}, "No tokens to parse");
         }
-
-        return parseEquality();
+        return parseBinary();
     } catch (ParseError &error) {
         std::cout << error.what() << std::endl;
         return nullptr;
     }
 }
 
-Expr *Parser::parseEquality() {
-    printf("parseEquality\n");
-    Expr *expr = parseComparison();
-
-    while(match({TokenType::EqualEqual, TokenType::BangEqual})) {
-        Token operatorToken = previous();
-        Expr *right = parseComparison();
-        expr = new BinaryExpr(expr, operatorToken, right);
-    }
-
-    return expr;
-}
-
-Expr *Parser::parseComparison() {
-    printf("parseComparison\n");
-    Expr *expr = parseTerm();
-
-    while (match({TokenType::Greater, TokenType::GreaterEqual, TokenType::Less, TokenType::LessEqual})) {
-        Token operatorToken = previous();
-        Expr *right = parseTerm();
-        expr = new BinaryExpr(expr, operatorToken, right);
-    }
-
-    return expr;
-}
-
-Expr *Parser::parseTerm() {
-    printf("parseTerm\n");
-    Expr *expr = parseFactor();
-
-    while (match({TokenType::Add, TokenType::Subtract})) {
-        Token operatorToken = previous();
-        Expr *right = parseFactor();
-        expr = new BinaryExpr(expr, operatorToken, right);
-    }
-
-    return expr;
-}
-
-Expr *Parser::parseFactor() {
-    printf("parseFactor\n");
-    Expr* expr = parseUnary();
-
-    while (match({TokenType::Divide, TokenType::Multiply})) {
-        Token operatorToken = previous();
-        Expr* right = parseUnary();
-        expr = new BinaryExpr(expr, operatorToken, right);
-    }
-
-    return expr;
-}
-
-Expr *Parser::parseUnary() {
-    printf("parseUnary\n");
-    if (match({TokenType::Bang, TokenType::Minus})) {
-        Token operatorToken = previous();
-        Expr* right = parseUnary();
-        return new UnaryExpr(operatorToken, right);
-    }
-    return parsePrimary();
-}
-
-Expr *Parser::parsePrimary() {
-    printf("parsePrimary\n");
-    if (match({TokenType::True})) {
-        return new LiteralExpr(new bool(true), Constants::Bool);
-    }
-    if (match({TokenType::False})) {
-        return new LiteralExpr(new bool(false), Constants::Bool);
-    }
-    if (match({TokenType::Nil})) {
-        return new LiteralExpr(nullptr, Constants::Nil);
-    }
-
+struct ASTNode *Parser::parseLiteral() {
+    // Check if the token is a number
     if (match({TokenType::Number})) {
-        return new LiteralExpr(new double(std::stod(previous().getLexeme())), Constants::Double);
+        return new ASTNode(TokenType::Number, new double(std::stod(previous().getValue())), Types::Double);
     }
-    if (match({TokenType::String})) {
-        return new LiteralExpr(new std::string(previous().getLexeme()), Constants::String);
-    }
+//    if (match({TokenType::String})) {
+//        return new ASTNode(TokenType::String, previous().getValue(), Types::String);
+//    }
+//    if (match({TokenType::True})) {
+//        return new ASTNode(TokenType::True, previous().getValue(), Types::Bool);
+//    }
+//    if (match({TokenType::False})) {
+//        return new ASTNode(TokenType::False, previous().getValue(), Types::Bool);
+//    }
 
-    if (match({TokenType::LeftParen})) {
-        Expr* expr = parse();
-        consume(TokenType::RightParen, "Expected ')' after expression.");
-        return new GroupingExpr(expr);
-    }
-
-    throw ParseError(peek(), "Expected expression.");
+    throw ParseError(peek(), "Expected expression");
 }
 
+struct ASTNode *Parser::parseBinary() {
+    struct ASTNode* left = parseLiteral();
+    // If we're at the end of the expression, return the left node
+    if (isAtEnd()) {
+        return left;
+    }
 
-//ParseError Parser::error(Token token, std::string message) {
-//    if (token.getType() == TokenType::Invalid) {
-//        std::cout << "Error at end: " << message << std::endl;
-//    } else {
-//        std::cout << "Error at " << token.getLexeme() << ": " << message << std::endl;
-//    }
-//    return ParseError();
-//}
+    // Check if the next token is a binary operator
+    if (match({TokenType::Add, TokenType::Minus, TokenType::Star, TokenType::Slash})) {
+        // If it is, create a new node with the operator as the type
+        auto* node = new ASTNode(previous().getType(), nullptr, Types::Operator);
+        // Set the left node as the left child
+        node->left = left;
+        // Set the right node as the right child
+        node->right = parseBinary();
+        // Return the node
+        return node;
+    }
+    return nullptr;
+}

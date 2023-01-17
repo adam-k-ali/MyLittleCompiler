@@ -9,7 +9,6 @@
 #include <vector>
 #include "Token.h"
 #include "Scanner.h"
-#include "Expr.h"
 
 class ParseError : public std::exception {
 private:
@@ -41,18 +40,22 @@ private:
     bool check(TokenType type);
     bool isAtEnd();
 
-    Expr* parseEquality();
-    Expr* parseComparison();
-    Expr* parseTerm();
-    Expr* parseFactor();
-    Expr* parseUnary();
-    Expr* parsePrimary();
+    /**
+     * Parses a unary expression
+     * @return The AST node for the primary factor
+     */
+    struct ASTNode* parseLiteral();
 
-    ParseError error(Token token, std::string message);
+    /**
+     * Parses a binary expression
+     * @return The ASTNode for the binary expression
+     */
+    struct ASTNode* parseBinary();
+
 public:
     explicit Parser(const std::vector<Token> tokens) : tokens(tokens) {};
 
-    Expr* parse();
+    struct ASTNode* parse();
 };
 
 

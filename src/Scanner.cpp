@@ -62,15 +62,15 @@ Token Scanner::read() {
     }
     if ('-' == c) {
         ++m_current;
-        return {TokenType::Subtract};
+        return {TokenType::Minus};
     }
     if ('*' == c) {
         ++m_current;
-        return {TokenType::Multiply};
+        return {TokenType::Star};
     }
     if ('/' == c) {
         ++m_current;
-        return {TokenType::Divide};
+        return {TokenType::Slash};
     }
     // Parentheses
     if ('(' == c) {

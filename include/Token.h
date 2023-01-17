@@ -6,8 +6,15 @@
 #define COMPILER_TOKEN_H
 
 #include <string>
+#include <map>
 
-
+enum class Types {
+    Nil,
+    Bool,
+    Double,
+    String,
+    Operator
+};
 
 enum class TokenType {
     Invalid,
@@ -22,10 +29,9 @@ enum class TokenType {
 
     // Operators
     Add,
-    Subtract,
-    Multiply,
-    Divide,
     Minus,
+    Star,
+    Slash,
 
     Bang,
     BangEqual,
@@ -40,20 +46,96 @@ enum class TokenType {
     RightParen,
 };
 
+// Create map of token types to their string representation
+const std::map<TokenType, std::string> tokenToName = {
+        {TokenType::Invalid, "Invalid"},
+        {TokenType::EndOfFile, "EndOfFile"},
+        {TokenType::Number, "Number"},
+        {TokenType::String, "String"},
+        {TokenType::True, "True"},
+        {TokenType::False, "False"},
+        {TokenType::Nil, "Nil"},
+        {TokenType::Add, "Add"},
+        {TokenType::Minus, "Minus"},
+        {TokenType::Star, "Star"},
+        {TokenType::Slash, "Slash"},
+        {TokenType::Bang, "Bang"},
+        {TokenType::BangEqual, "BangEqual"},
+        {TokenType::EqualEqual, "EqualEqual"},
+        {TokenType::Greater, "Greater"},
+        {TokenType::GreaterEqual, "GreaterEqual"},
+        {TokenType::Less, "Less"},
+        {TokenType::LessEqual, "LessEqual"},
+        {TokenType::LeftParen, "LeftParen"},
+        {TokenType::RightParen, "RightParen"},
+};
+
+struct ASTNode {
+    TokenType type;
+    void* value;
+    Types dtype;
+    ASTNode* left;
+    ASTNode* right;
+
+    // Build a leaf node
+    ASTNode(TokenType type, void* value, Types dtype) {
+        this->type = type;
+        this->value = value;
+        this->dtype = dtype;
+        this->left = nullptr;
+        this->right = nullptr;
+    }
+
+    // Build a generic AST node
+    ASTNode(TokenType type, void* value, Types dtype, ASTNode* left, ASTNode* right) {
+        this->type = type;
+        this->value = value;
+        this->dtype = dtype;
+        this->left = left;
+        this->right = right;
+    }
+
+    // Build a node with only 1 child
+    ASTNode(TokenType type, void* value, Types dtype, ASTNode* left) {
+        this->type = type;
+        this->value = value;
+        this->dtype = dtype;
+        this->left = left;
+        this->right = nullptr;
+    }
+    /**
+     * Convert AST to string
+     * @return
+     */
+    std::string toString() const {
+        std::string result = "";
+
+        if (dtype == Types::Nil) {
+            result += "nil";
+        } else if (dtype == Types::Bool) {
+            result += *(bool*)value ? "true" : "false";
+        } else if (dtype == Types::Double) {
+            result += std::to_string(*(double*)value);
+        } else if (dtype == Types::String) {
+            result += *(std::string*)value;
+        }
+
+        return result;
+    }
+
+};
+
 class Token {
 private:
     TokenType type;
-    char* lexeme;
+    char* value;
 public:
-    Token(TokenType type, char* value) : type(type), lexeme(value) {};
-    Token(TokenType type) : type(type), lexeme(nullptr) {};
+    Token(TokenType type, char* value) : type(type), value(value) {};
+    Token(TokenType type) : type(type), value(nullptr) {};
 
     TokenType getType() const { return type; }
-    char* getLexeme() const { return lexeme; }
-
-    std::string toString() const;
+    char* getValue() const { return value; }
 };
-
 
 
 #endif //COMPILER_TOKEN_H
