@@ -7,6 +7,7 @@
 #include "Parser.h"
 #include "Scanner.h"
 #include "FileMap.h"
+#include "Interpret.h"
 
 class MathExpressionTest : public ::testing::Test {
 private:
@@ -41,9 +42,21 @@ public:
         std::string actual = treeToString(expr);
         ASSERT_EQ(expected, actual);
     }
+
+    static ASTNode* parse(const std::string input) {
+        FileMap file(input.c_str());
+
+        Scanner scanner(file.begin(), file.end());
+        Parser parser(scanner.getTokens());
+        return parser.parse();
+    }
 };
 
 TEST(MathExpressionTest, SampleA) {
     MathExpressionTest::testParsing("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b", "(Minus(Add(Star(5.000000)(5.000000))(Slash(3.000000)(2.000000)))(7.000000))");
 }
 
+TEST(MathExpressionTest, SampleAInterpret) {
+    ASTNode* expr = MathExpressionTest::parse("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b");
+    ASSERT_EQ(interpretAST(expr), 19.5);
+}
