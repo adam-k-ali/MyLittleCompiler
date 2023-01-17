@@ -12,6 +12,7 @@ extern char Text[TEXTLEN + 1]; // Last identifier scanned
 enum class Types {
     Nil,
     Bool,
+    Integer,
     Double,
     String,
     Void,
@@ -19,59 +20,70 @@ enum class Types {
 
 enum class TokenType {
     Invalid,
-    EndOfFile,
-    SemiColon,
+    T_EOF,
+    T_SEMICOLON,
 
     // Literals
     Number,
     Identifier,
 
     // Keywords
-    Print,
-    Int,
+    T_PRINT,
+    T_INT,
 
     // Operators
-    Plus,
-    Minus,
-    Star,
-    Slash,
-    Assign,
+    T_PLUS,
+    T_MINUS,
+    T_STAR,
+    T_SLASH,
+    T_EQUAL,
+
+    // Variable types
+    V_INT,
 };
 
 // Create map of token types to their string representation
 const std::map<TokenType, std::string> TokenToName = {
-        {TokenType::Invalid,   "Invalid"},
-        {TokenType::EndOfFile, "EndOfFile"},
-        {TokenType::SemiColon, "SemiColon"},
+        {TokenType::Invalid,     "Invalid"},
+        {TokenType::T_EOF,       "T_EOF"},
+        {TokenType::T_SEMICOLON, "T_SEMICOLON"},
 
-        {TokenType::Number,    "Number"},
-        {TokenType::Identifier, "Identifier"},
+        {TokenType::Number,      "Number"},
+        {TokenType::Identifier,  "Identifier"},
 
-        {TokenType::Print,     "Print"},
+        {TokenType::T_PRINT,     "T_PRINT"},
+        {TokenType::T_INT,       "T_INT"},
 
-        {TokenType::Plus,      "Plus"},
-        {TokenType::Minus,     "Minus"},
-        {TokenType::Star,      "Star"},
-        {TokenType::Slash,     "Slash"},
-        {TokenType::Assign,    "Assign"},
+        {TokenType::T_PLUS,      "T_PLUS"},
+        {TokenType::T_MINUS,     "T_MINUS"},
+        {TokenType::T_STAR, "T_STAR"},
+        {TokenType::T_SLASH, "T_SLASH"},
+        {TokenType::T_EQUAL, "T_EQUAL"},
+
+        {TokenType::V_INT, "V_INT"},
+};
+
+const std::map<std::string, TokenType> NameToKeyword = {
+        {"print", TokenType::T_PRINT},
+        {"int", TokenType::T_INT},
 };
 
 const std::map<TokenType, int> OpPrec = {
-        {TokenType::Invalid,   0},
-        {TokenType::EndOfFile, 0},
-        {TokenType::SemiColon, 0},
+        {TokenType::Invalid,     0},
+        {TokenType::T_EOF,       0},
+        {TokenType::T_SEMICOLON, 0},
 
-        {TokenType::Number,    0},
-        {TokenType::Identifier, 0},
+        {TokenType::Number,      0},
+        {TokenType::Identifier,  0},
 
-        {TokenType::Print,     0},
-        {TokenType::Int,       0},
+        {TokenType::T_PRINT,     0},
+        {TokenType::T_INT,       0},
 
-        {TokenType::Plus,      10},
-        {TokenType::Minus,     10},
-        {TokenType::Star,      20},
-        {TokenType::Slash,     20},
-        {TokenType::Assign,    0},
+        {TokenType::T_PLUS,      10},
+        {TokenType::T_MINUS,     10},
+        {TokenType::T_STAR,      20},
+        {TokenType::T_SLASH,    20},
+        {TokenType::T_EQUAL,    0},
 };
 
 struct symtable {

@@ -54,15 +54,15 @@ int GenAsm::genAst(struct ASTNode *node) {
     switch(node->type) {
         case TokenType::Number:
             return cgload(*(int *) node->value);
-        case TokenType::Plus:
+        case TokenType::T_PLUS:
             return cgadd(leftreg, rightreg);
-        case TokenType::Minus:
+        case TokenType::T_MINUS:
             return cgsub(leftreg, rightreg);
-        case TokenType::Star:
+        case TokenType::T_STAR:
             return cgmul(leftreg, rightreg);
-        case TokenType::Slash:
+        case TokenType::T_SLASH:
             return cgdiv(leftreg, rightreg);
-        case TokenType::Print:
+        case TokenType::T_PRINT:
             cgprintint(leftreg);
             break;
         default:

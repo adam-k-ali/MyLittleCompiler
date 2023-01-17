@@ -8,23 +8,24 @@
 
 
 
+
 Token Parser::previous() {
     if (current == 0) {
-        return {TokenType::Invalid};
+        return {TokenType::Invalid, 0, 0};
     }
     return tokens[current - 1];
 }
 
 Token Parser::peek() {
     if(tokens.size() <= current) {
-        return {TokenType::EndOfFile};
+        return {TokenType::T_EOF, 0, 0};
     }
     return tokens.at(current);
 }
 
 Token Parser::next() {
     if (current + 1 >= tokens.size()) {
-        return {TokenType::Invalid};
+        return {TokenType::Invalid, 0, 0};
     }
     return tokens.at(current + 1);
 }
@@ -40,8 +41,8 @@ Token Parser::consume(TokenType type, std::string message) {
     if (check(type)) {
         return advance();
     }
-
-    throw ParseError(peek(), std::move(message));
+    throw ParseError(peek(), message);
+//    throw ParseError(peek(), std::move(message), Token(TokenType::T_SLASH, nullptr, 0, 0));
 }
 
 
@@ -67,18 +68,18 @@ bool Parser::isAtEnd() {
     if (current >= tokens.size()) {
         return true;
     }
-    return peek().getType() == TokenType::EndOfFile;
+    return peek().getType() == TokenType::T_EOF;
 }
 
-struct ASTNode* Parser::parse() {
+struct std::list<ASTNode*> Parser::parse() {
     try {
         if (tokens.empty()) {
-            throw ParseError({TokenType::Invalid}, "No tokens to parse");
+            throw ParseError({TokenType::Invalid, 0, 0}, "No tokens to parse");
         }
-        return parseStatement();
+        return parseStatements();
     } catch (ParseError &error) {
         std::cout << error.what() << std::endl;
-        return nullptr;
+        return {};
     }
 }
 
@@ -96,7 +97,7 @@ struct ASTNode *Parser::parseBinary() {
         Token token = advance();
         right = parseBinary();
         left = new ASTNode(token.getType(), Types::Void, left, right);
-        if (isAtEnd() || peek().getType() == TokenType::SemiColon) {
+        if (isAtEnd() || peek().getType() == TokenType::T_SEMICOLON) {
             return left;
         }
     }
@@ -106,63 +107,76 @@ struct ASTNode *Parser::parseBinary() {
 struct ASTNode *Parser::parseLiteral() {
     // Check if the token is a number
     if (match({TokenType::Number})) {
-        return new ASTNode(TokenType::Number, new double(std::stod(previous().getValue())), Types::Double);
+        return new ASTNode(TokenType::Number, new double(std::stod(previous().getValue())), Types::Integer);
+    }
+    if (match({TokenType::Identifier})) {
+        return new ASTNode(TokenType::Identifier, new std::string(previous().getValue()), Types::String);
     }
 
     throw ParseError(peek(), "Expected expression");
 }
 
-struct ASTNode *Parser::parseStatement() {
-    struct ASTNode *root, *left;
-    if (match({TokenType::Print, TokenType::Int, TokenType::Identifier})) {
-        Token token = previous();
+struct std::list<ASTNode*> Parser::parseStatements() {
+    std::list<struct ASTNode*> statements;
+
+    while (match({TokenType::T_PRINT, TokenType::T_INT, TokenType::Identifier})) {
+        Token token = previous(); // Store the token that's been matched
         switch (token.getType()) {
-            case TokenType::Print:
-                left = parseLiteral();
+            case TokenType::T_PRINT:
+                statements.push_back(parsePrintStmt());
                 break;
-            case TokenType::Int:
-                left = parseDeclaration();
+            case TokenType::T_INT:
+                statements.push_back(parseVarDeclStmt());
                 break;
             case TokenType::Identifier:
-                left = parseAssignment();
+                statements.push_back(parseAssignmentStmt());
                 break;
+            default:
+                throw ParseError(token, "Expected statement");
         }
-        left = parseBinary();
-        root = new ASTNode(TokenType::Print, Types::Void, left, nullptr);
-        consume(TokenType::SemiColon, "Expected ';' after expression");
-        return root;
     }
+    if (statements.empty()) {
+        throw ParseError(peek(), "Expected statement");
+    }
+
+    return statements;
 }
 
 
 struct ASTNode *Parser::parseVarDeclStmt() {
-    // int foo = 5;
+    ASTNode *left, *right;
     // The next token should be the identifier
     Token identifier = consume(TokenType::Identifier, "Expected identifier after 'int'");
-    // The next token should be the equals sign
-    consume(TokenType::Assign, "Expected '=' after identifier");
-    // The next token should be the value
-    Token value = consume(TokenType::Number, "Expected value after '='");
-    // The next token should be the semicolon
-    consume(TokenType::SemiColon, "Expected ';' after value");
-    ASTNode* identifierNode = new ASTNode(identifier.getType(), identifier.getValue(), Types::String);
-    ASTNode* valueNode = new ASTNode(value.getType(), new double(std::stod(value.getValue())), Types::Double);
-    return new ASTNode(TokenType::Int, Types::Void, identifierNode, valueNode);
+    left = new ASTNode(identifier.getType(), identifier.getValue(), Types::String);
+
+    // The next token should be the assignment operator or a semicolon
+    if (match({TokenType::T_EQUAL})) {
+        // The next token should be the value
+        right = parseBinary();
+        consume(TokenType::T_SEMICOLON, "Expected ';' after value");
+        return new ASTNode(TokenType::V_INT, Types::Void, left, right);
+    } else if (match({TokenType::T_SEMICOLON})) {
+        return new ASTNode(TokenType::V_INT, Types::Void, left, nullptr);
+    }
+
+    throw ParseError(peek(), "Expected '=' or ';' after identifier");
 }
 
 struct ASTNode *Parser::parsePrintStmt() {
     struct ASTNode *root, *left;
     left = parseBinary();
-    root = new ASTNode(TokenType::Print, Types::Void, left, nullptr);
-    consume(TokenType::SemiColon, "Expected ';' after expression");
+    root = new ASTNode(TokenType::T_PRINT, Types::Void, left, nullptr);
+    consume(TokenType::T_SEMICOLON, "Expected ';' after expression");
     return root;
 }
 
 struct ASTNode *Parser::parseAssignmentStmt() {
     struct ASTNode *root, *left, *right;
     Token identifier = previous();
-    consume(TokenType::Assign, "Expected '=' after identifier");
-    left = parseBinary();
-    root = new ASTNode(TokenType::Assign, Types::Void, left, nullptr);
+    consume(TokenType::T_EQUAL, "Expected '=' after identifier");
+    right = parseBinary();
+    consume(TokenType::T_SEMICOLON, "Expected ';' after expression");
+    left = new ASTNode(identifier.getType(), identifier.getValue(), Types::String);
+    root = new ASTNode(TokenType::T_EQUAL, Types::Void, left, right);
     return root;
 }

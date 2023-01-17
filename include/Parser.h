@@ -6,17 +6,24 @@
 #define COMPILER_PARSER_H
 
 #include <utility>
+#include <list>
 #include <vector>
 #include "Token.h"
-#include "Scanner.h"
+#include "Lexer.h"
 #include "defs.h"
 
 class ParseError : public std::exception {
 private:
     Token token;
     std::string message;
+    int line;
+    int column;
 public:
-    ParseError(const Token& token, std::string message) : token(token), message(std::move(message)) {};
+    ParseError(const Token &token, std::string message) : token(token) {
+        this->line = token.getLine();
+        this->column = token.getColumn();
+        this->message = "SyntaxError: " + message + " at " + std::to_string(line) + ":" + std::to_string(column);
+    };
 
     const char *what() const noexcept override {
         return message.c_str();
@@ -33,6 +40,8 @@ private:
     const std::vector<Token> tokens;
 
     size_t current = 0;
+    size_t column = 0;
+    size_t line = 1;
 
     Token previous();
     Token peek();
@@ -61,16 +70,16 @@ private:
       * Parse a statement
       * @return The AST node for the statement
       */
-     struct ASTNode* parseStatement();
+     struct std::list<ASTNode*> parseStatements();
 
      struct ASTNode* parsePrintStmt();
      struct ASTNode* parseVarDeclStmt();
-        struct ASTNode* parseAssignmentStmt();
+    struct ASTNode* parseAssignmentStmt();
 
 public:
     explicit Parser(const std::vector<Token> tokens) : tokens(tokens) {};
 
-    struct ASTNode* parse();
+    struct std::list<ASTNode*> parse();
 };
 
 

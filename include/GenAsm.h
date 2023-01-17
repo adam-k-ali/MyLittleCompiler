@@ -69,14 +69,14 @@ private:
     }
 
     /**
-     * Print a blank line to the output file
+     * T_PRINT a blank line to the output file
      */
      void blankLine() {
         fprintf(output, "\n");
     }
 
     /**
-     * Print a comment to the output file
+     * T_PRINT a comment to the output file
      */
      void comment(const std::string &comment) {
         fprintf(output, "# %s\n", comment.c_str());
@@ -93,7 +93,7 @@ private:
      void cgpostamble();
 
      /**
-      * Print a register
+      * T_PRINT a register
       * @param reg The register to print
       */
       void cgprintint(int reg);

@@ -5,7 +5,7 @@
 
 #include "Token.h"
 #include "Parser.h"
-#include "Scanner.h"
+#include "Lexer.h"
 #include "FileMap.h"
 #include "GenAsm.h"
 #include "defs.h"
@@ -39,32 +39,36 @@ private:
 public:
     static void testParsing(const std::string input, std::string expected) {
         FileMap file(input.c_str());
-        Scanner scanner(file.begin(), file.end());
-        Parser parser(scanner.getTokens());
-        struct ASTNode* expr = parser.parse();
-        std::string actual = treeToString(expr);
+        Lexer scanner(file.begin(), file.end());
+        // T_PRINT the tokens
+        std::vector<Token> tokens = scanner.getTokens();
+        printf("Tokens: ");
+        for (Token token : tokens) {
+            printf("%s,", TokenToName.at(token.getType()).c_str());
+        }
+        printf("\n");
+        Parser parser(tokens);
+        std::list<ASTNode*> expr = parser.parse();
+
+        printf("Parsed statements: %d\n", expr.size());
+
+        std::string actual = "";
+        for (ASTNode* node : expr) {
+            actual += treeToString(node);
+        }
         ASSERT_EQ(expected, actual);
     }
 
-    static ASTNode* parse(const std::string input) {
+    static std::list<ASTNode*> parse(const std::string input) {
         FileMap file(input.c_str());
 
-        Scanner scanner(file.begin(), file.end());
+        Lexer scanner(file.begin(), file.end());
         Parser parser(scanner.getTokens());
         return parser.parse();
     }
 };
 
 TEST(MathExpressionTest, SampleA) {
-    MathExpressionTest::testParsing("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b", "(Print(Minus(Plus(Star(5.000000)(5.000000))(Slash(3.000000)(2.000000)))(7.000000)))");
-}
-
-TEST(MathExpressionTest, SampleACompile) {
-    ASTNode* expr = MathExpressionTest::parse("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b");
-    GenAsm genAsm("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.s");
-    genAsm.compile(expr);
-}
-
-TEST(MathExpressionTest, SampleB) {
-    MathExpressionTest::testParsing("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample2.b", "(Print(Plus(5.000000)(5.000000)))");
+    MathExpressionTest::testParsing("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b",
+                                    "(V_INT(fred))(V_INT(jim))(T_EQUAL(fred)(5))(T_EQUAL(jim)(12))(T_PRINT(T_PLUS(fred)(jim)))");
 }
