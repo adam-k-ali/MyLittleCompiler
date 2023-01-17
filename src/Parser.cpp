@@ -5,15 +5,15 @@
 #include "Parser.h"
 
 std::map<TokenType, int> Parser::OpPrec = {
-        {TokenType::Invalid, 0},
+        {TokenType::Invalid,   0},
         {TokenType::EndOfFile, 0},
 
-        {TokenType::Number, 0},
+        {TokenType::Number,    0},
 
-        {TokenType::Add, 10},
-        {TokenType::Minus, 10},
-        {TokenType::Star, 20},
-        {TokenType::Slash, 20},
+        {TokenType::Plus,      10},
+        {TokenType::Minus,     10},
+        {TokenType::Star,      20},
+        {TokenType::Slash,     20},
 };
 
 Token Parser::previous() {

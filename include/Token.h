@@ -22,52 +22,23 @@ enum class TokenType {
 
     // Literals
     Number,
-    String,
-    True,
-    False,
-    Nil,
 
     // Operators
-    Add,
+    Plus,
     Minus,
     Star,
     Slash,
-
-    Bang,
-    BangEqual,
-    EqualEqual,
-    Greater,
-    GreaterEqual,
-    Less,
-    LessEqual,
-
-    // Parenthesis
-    LeftParen,
-    RightParen,
 };
 
 // Create map of token types to their string representation
 const std::map<TokenType, std::string> tokenToName = {
-        {TokenType::Invalid, "Invalid"},
+        {TokenType::Invalid,   "Invalid"},
         {TokenType::EndOfFile, "EndOfFile"},
-        {TokenType::Number, "Number"},
-        {TokenType::String, "String"},
-        {TokenType::True, "True"},
-        {TokenType::False, "False"},
-        {TokenType::Nil, "Nil"},
-        {TokenType::Add, "Add"},
-        {TokenType::Minus, "Minus"},
-        {TokenType::Star, "Star"},
-        {TokenType::Slash, "Slash"},
-        {TokenType::Bang, "Bang"},
-        {TokenType::BangEqual, "BangEqual"},
-        {TokenType::EqualEqual, "EqualEqual"},
-        {TokenType::Greater, "Greater"},
-        {TokenType::GreaterEqual, "GreaterEqual"},
-        {TokenType::Less, "Less"},
-        {TokenType::LessEqual, "LessEqual"},
-        {TokenType::LeftParen, "LeftParen"},
-        {TokenType::RightParen, "RightParen"},
+        {TokenType::Number,    "Number"},
+        {TokenType::Plus,      "Plus"},
+        {TokenType::Minus,     "Minus"},
+        {TokenType::Star,      "Star"},
+        {TokenType::Slash,     "Slash"},
 };
 
 struct ASTNode {

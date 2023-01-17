@@ -15,4 +15,8 @@ multiplication_expression ::= number
                             | number '/' multiplication_expression
                             ;
 
+
+statements ::= statement | statement statements;
+statement ::= 'print' expression ';'
+
 number ::= T_INT | T_DOUBLE;

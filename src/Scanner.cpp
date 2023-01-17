@@ -42,11 +42,23 @@ Token Scanner::readNumber() {
     return {TokenType::Number, c_value};
 }
 
+int Scanner::skip() {
+    int count = 0;
+    std::vector<char> skipChars = {' ', '\t', '\n', '\r', '\f'};
+    while(m_current != m_end) {
+        if (std::find(skipChars.begin(), skipChars.end(), *m_current) != skipChars.end()) {
+            ++m_current;
+            ++count;
+        } else {
+            break;
+        }
+    }
+    return count;
+}
+
 Token Scanner::read() {
     // Skip whitespace
-    while (m_current != m_end && isspace(*m_current)) {
-        ++m_current;
-    }
+    skip();
 
     // Check if we've reached the end of the file
     if (m_current == m_end) {
@@ -55,39 +67,28 @@ Token Scanner::read() {
 
     char c = *m_current;
 
-    // Operators
-    if ('+' == c) {
-        ++m_current;
-        return {TokenType::Add};
+    switch(c) {
+        case EOF:
+            return {TokenType::EndOfFile};
+        case '+':
+            ++m_current;
+            return {TokenType::Plus};
+        case '-':
+            ++m_current;
+            return {TokenType::Minus};
+        case '*':
+            ++m_current;
+            return {TokenType::Star};
+        case '/':
+            ++m_current;
+            return {TokenType::Slash};
+        default:
+            if (isdigit(c)) {
+                return readNumber();
+            } else {
+                return {TokenType::Invalid};
+            }
     }
-    if ('-' == c) {
-        ++m_current;
-        return {TokenType::Minus};
-    }
-    if ('*' == c) {
-        ++m_current;
-        return {TokenType::Star};
-    }
-    if ('/' == c) {
-        ++m_current;
-        return {TokenType::Slash};
-    }
-    // Parentheses
-    if ('(' == c) {
-        ++m_current;
-        return {TokenType::LeftParen};
-    }
-    if (')' == c) {
-        ++m_current;
-        return {TokenType::RightParen};
-    }
-
-    // Check if we're reading a number
-    if ('.' == c || isdigit(c)) {
-        return readNumber();
-    }
-
-    return {TokenType::Invalid};
 }
 
 std::vector<Token> Scanner::getTokens() {

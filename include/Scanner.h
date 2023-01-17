@@ -13,6 +13,11 @@ private:
     const char* m_end;
     const char* m_current;
 
+    int skip();
+
+    Token readKeyword();
+    Token readIdentifier();
+
     Token readNumber();
 public:
     Scanner(const char* m_begin, const char* m_end) : m_begin(m_begin), m_end(m_end), m_current(m_begin) {}

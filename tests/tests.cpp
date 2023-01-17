@@ -8,6 +8,7 @@
 #include "Scanner.h"
 #include "FileMap.h"
 #include "Interpret.h"
+#include "GenAsm.h"
 
 class MathExpressionTest : public ::testing::Test {
 private:
@@ -53,10 +54,16 @@ public:
 };
 
 TEST(MathExpressionTest, SampleA) {
-    MathExpressionTest::testParsing("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b", "(Minus(Add(Star(5.000000)(5.000000))(Slash(3.000000)(2.000000)))(7.000000))");
+    MathExpressionTest::testParsing("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b", "(Minus(Plus(Star(5.000000)(5.000000))(Slash(3.000000)(2.000000)))(7.000000))");
 }
 
 TEST(MathExpressionTest, SampleAInterpret) {
     ASTNode* expr = MathExpressionTest::parse("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b");
     ASSERT_EQ(interpretAST(expr), 19.5);
+}
+
+TEST(MathExpressionTest, SampleACompile) {
+    ASTNode* expr = MathExpressionTest::parse("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.b");
+    GenAsm genAsm("/Users/adamali/Developer/CLionProjects/Compiler/tests/test_res/Sample.s");
+    genAsm.compile(expr);
 }
