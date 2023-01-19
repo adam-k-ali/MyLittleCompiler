@@ -90,7 +90,7 @@ Token Lexer::readKeywordIdentifier() {
     }
 
     // Otherwise, return it as an identifier
-    return {TokenTypes::T_IDENTIFIER, new std::string(word), line, column};
+    return {TokenTypes::TL_IDENTIFIER, new std::string(word), line, column};
 }
 
 Token Lexer::readNumber() {
@@ -115,7 +115,7 @@ Token Lexer::readNumber() {
         throw LexerError("Unexpected character '.'", line, column);
     }
 
-    return {isDecimal ? TokenTypes::T_DECIMAL : TokenTypes::T_INTEGER, new std::string(number), line, column};
+    return {isDecimal ? TokenTypes::TL_DECIMAL : TokenTypes::TL_INTEGER, new std::string(number), line, column};
 }
 
 Token Lexer::readString() {
@@ -129,7 +129,7 @@ Token Lexer::readString() {
     // Check the next character is a double quote
     consume('"', "Expected '\"'");
 
-    return {TokenTypes::T_STRING, new std::string(string), line, column};
+    return {TokenTypes::TL_STRING, new std::string(string), line, column};
 }
 
 Token Lexer::read() {
@@ -147,26 +147,42 @@ Token Lexer::read() {
         return {TokenTypes::T_EOF, line, column};
     }
 
-    char c = *m_current;
+    char current_char = *m_current;
+    char next_char = m_current + 1 < m_end ? *(m_current + 1) : '\0';
+    char next_next_char = m_current + 2 < m_end ? *(m_current + 2) : '\0';
 
-    if (SymbolToToken.find(c) != SymbolToToken.end()) {
-        // If the current character is a symbol, return the corresponding token
+    // Handle symbols of length 1 to 3
+    std::string symbol1 = std::string(1, current_char);
+    std::string symbol2 = std::string(1, current_char) + std::string(1, next_char);
+    std::string symbol3 = std::string(1, current_char) + std::string(1, next_char) + std::string(1, next_next_char);
+
+    if (SymbolToToken.find(symbol3) != SymbolToToken.end()) {
         advance();
-        return {SymbolToToken.at(c), line, column};
+        advance();
+        advance();
+        return {SymbolToToken.at(symbol3), line, column};
+    } else if (SymbolToToken.find(symbol2) != SymbolToToken.end()) {
+        advance();
+        advance();
+        return {SymbolToToken.at(symbol2), line, column};
+    } else if (SymbolToToken.find(symbol1) != SymbolToToken.end()) {
+        advance();
+        return {SymbolToToken.at(symbol1), line, column};
     }
 
-    if (std::isdigit(c)) {
+
+    if (std::isdigit(current_char)) {
         // If the current character is a digit, read a number
         return readNumber();
     }
 
-    if (c == '"') {
+    if (current_char == '"') {
         // If the current character is a double quote, read a string
         advance();
         return readString();
     }
 
-    if (std::isalpha(c)) {
+    if (std::isalpha(current_char)) {
         // If the current character is a letter, read a keyword or identifier
 
         return readKeywordIdentifier();

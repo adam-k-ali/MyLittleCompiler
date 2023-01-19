@@ -2,7 +2,7 @@ compilation_unit ::= include_statements? class_declaration;
 
 // Tokens
 T_EOF ::= <EOF>;
-T_IDENTIFIER ::= <IDENTIFIER>;
+TL_IDENTIFIER ::= <IDENTIFIER>;
 TK_PACKAGE ::= 'package';
 TK_INCLUDE ::= "include";
 TK_CLASS ::= 'class';
@@ -12,10 +12,10 @@ TK_CLASS ::= 'class';
 include_statements ::= include_statement
                      | include_statement include_statements
                      ;
-include_statement ::= 'include' T_STRING ';';
+include_statement ::= 'include' TL_STRING ';';
 
 // Class definition, e.g. class Foo { ... }
-class_declaration ::= 'class' T_IDENTIFIER '{' class_body '}';
+class_declaration ::= 'class' TL_IDENTIFIER '{' class_body '}';
 
 // The body of a class
 class_body ::= class_member
@@ -29,7 +29,7 @@ class_member ::= function_declaration
 
 
 // A function declaration, e.g. void foo() { ... }
-function_declaration ::= func_type_specifier T_IDENTIFIER '(' parameter_list? ')' '{' function_body '}';
+function_declaration ::= func_type_specifier TL_IDENTIFIER '(' parameter_list? ')' '{' function_body '}';
 function_body ::= statement
                 | statement function_body
                 ;
@@ -39,7 +39,7 @@ function_body ::= statement
 parameter_list ::= parameter
                  | parameter ',' parameter_list
                  ;
-parameter ::= T_IDENTIFIER ':' type; // e.g. x: int
+parameter ::= TL_IDENTIFIER ':' type; // e.g. x: int
 
 // The type specifier of a function
 func_type_specifier ::= type
@@ -79,10 +79,10 @@ assignment_expression ::= conditional_expression
 assignment_operator ::= '='
 unary_expression ::= 'true'
                    | 'false'
-                   | T_IDENTIFIER
-                   | T_INTEGER
-                   | T_DECIMAL
-                   | T_STRING
+                   | TL_IDENTIFIER
+                   | TL_INTEGER
+                   | TL_DECIMAL
+                   | TL_STRING
                    | '(' expression ')'
                    | unary_operator unary_expression
                    ;

@@ -20,9 +20,9 @@ class Test: Object {
 
     int main(char[] args) {
         if(args.size() == 1) {
-            foo = 1;
+            foo = 1 << 2;
         } else {
-            foo = 2;
+            foo = 2 >> 1;
         }
 
         if (true) {
@@ -36,6 +36,7 @@ class Test: Object {
         for (int i = 0; i < 10; i++) {
             foo = 5;
         }
+        ...
 
         while (true) {
             foo = 6;
