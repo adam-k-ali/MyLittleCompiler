@@ -15,7 +15,7 @@ FILE(GLOB RESOURCE_FILES ${RESOURCE_DIR}/*)
 include_directories(${INCLUDE_DIR})
 include_directories(${SOURCE_DIR})
 
-# T_PLUS tests directory
+# TS_PLUS tests directory
 add_subdirectory(googletest)
 add_subdirectory(tests)
 enable_testing()

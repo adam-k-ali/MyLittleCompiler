@@ -3,9 +3,9 @@ compilation_unit ::= include_statements? class_declaration;
 // Tokens
 T_EOF ::= <EOF>;
 T_IDENTIFIER ::= <IDENTIFIER>;
-T_PACKAGE ::= 'package';
-T_INCLUDE ::= "include";
-T_CLASS ::= 'class';
+TK_PACKAGE ::= 'package';
+TK_INCLUDE ::= "include";
+TK_CLASS ::= 'class';
 
 // The include statements
 // e.g. #include <stdio.h>

@@ -4,7 +4,18 @@ package "main";
 
 include "lib.fmt";
 
-class Test {
+enum TokenType {
+    EOF,
+    IDENT,
+    INT
+}
+
+struct Token {
+    string type;
+    string value;
+}
+
+class Test: Object {
     private int foo; // 4 bytes
 
     int main(char[] args) {
