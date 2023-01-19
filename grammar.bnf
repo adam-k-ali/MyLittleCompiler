@@ -1,0 +1,88 @@
+compilation_unit ::= include_statements? class_declaration;
+
+// Tokens
+T_EOF ::= <EOF>;
+T_IDENTIFIER ::= <IDENTIFIER>;
+T_PACKAGE ::= 'package';
+T_INCLUDE ::= "include";
+T_CLASS ::= 'class';
+
+// The include statements
+// e.g. #include <stdio.h>
+include_statements ::= include_statement
+                     | include_statement include_statements
+                     ;
+include_statement ::= 'include' T_STRING ';';
+
+// Class definition, e.g. class Foo { ... }
+class_declaration ::= 'class' T_IDENTIFIER '{' class_body '}';
+
+// The body of a class
+class_body ::= class_member
+             | class_member class_body
+             ;
+
+// A class member, e.g. int foo; or void bar() { ... }
+class_member ::= function_declaration
+               | variable_declaration
+               ;
+
+
+// A function declaration, e.g. void foo() { ... }
+function_declaration ::= func_type_specifier T_IDENTIFIER '(' parameter_list? ')' '{' function_body '}';
+function_body ::= statement
+                | statement function_body
+                ;
+
+
+// The parameter list of a function
+parameter_list ::= parameter
+                 | parameter ',' parameter_list
+                 ;
+parameter ::= T_IDENTIFIER ':' type; // e.g. x: int
+
+// The type specifier of a function
+func_type_specifier ::= type
+                 | 'void'
+                 ;
+
+// Types
+type ::= type_specifier
+       | type_specifier '*'
+       ;
+type_specifier ::= numeric_type;
+numeric_type ::= integer_type | decimal_type;
+
+integer_type ::= 'int' | 'long' | 'short' | 'char'
+               ;
+decimal_type ::= 'float' | 'double'
+               ;
+
+statement ::= expression_statement
+            | if_statement
+            | while_statement
+            | for_statement
+            | return_statement
+            | break_statement
+            | continue_statement
+            | block_statement
+            ;
+
+// A statement that consists of an expression
+expression_statement ::= expression ';';
+expression ::= assignment_expression
+             | assignment_expression ',' expression
+             ;
+assignment_expression ::= conditional_expression
+                        | unary_expression assignment_operator assignment_expression
+                        ;
+assignment_operator ::= '='
+unary_expression ::= 'true'
+                   | 'false'
+                   | T_IDENTIFIER
+                   | T_INTEGER
+                   | T_DECIMAL
+                   | T_STRING
+                   | '(' expression ')'
+                   | unary_operator unary_expression
+                   ;
