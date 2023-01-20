@@ -5,6 +5,7 @@
 #ifndef COMPILER_TOKEN_H
 #define COMPILER_TOKEN_H
 
+#include <string>
 #include <map>
 
 /**
@@ -15,6 +16,7 @@
  */
 enum class TokenTypes {
     T_EOF,
+    T_INVALID,
 
     // Keywords
     TK_PACKAGE,
@@ -120,6 +122,7 @@ enum class TokenTypes {
 
 static std::map<TokenTypes, std::string> TokenToString = {
         {TokenTypes::T_EOF,            "T_EOF"},
+        {TokenTypes::T_INVALID,        "T_INVALID"},
 
         // Keywords
         {TokenTypes::TK_PACKAGE,       "TK_PACKAGE"},
@@ -321,6 +324,46 @@ static std::map<std::string, TokenTypes> SymbolToToken{
         {"...", TokenTypes::TS_ELLIPSIS},
 };
 
+// Operator Precedence
+static std::map<TokenTypes, int> OpPrec = {
+        {TokenTypes::TS_PLUS, 10},
+        {TokenTypes::TS_MINUS, 10},
+        {TokenTypes::TS_STAR, 20},
+        {TokenTypes::TS_SLASH, 20},
+        {TokenTypes::TS_MODULO, 20},
+        {TokenTypes::TS_EQUALS, 30},
+        {TokenTypes::TS_PLUS_EQUALS, 30},
+        {TokenTypes::TS_MINUS_EQUALS, 30},
+        {TokenTypes::TS_STAR_EQUALS, 30},
+        {TokenTypes::TS_SLASH_EQUALS, 30},
+        {TokenTypes::TS_MODULO_EQUALS, 30},
+        {TokenTypes::TS_PLUS_PLUS, 30},
+        {TokenTypes::TS_MINUS_MINUS, 30},
+        {TokenTypes::TS_BANG, 40},
+        {TokenTypes::TS_QUESTION_MARK, 50},
+        {TokenTypes::TS_COLON, 50},
+        {TokenTypes::TS_GREATER_THAN, 60},
+        {TokenTypes::TS_GREATER_THAN_EQUALS, 60},
+        {TokenTypes::TS_LESS_THAN, 60},
+        {TokenTypes::TS_LESS_THAN_EQUALS, 60},
+        {TokenTypes::TS_EQUALS_EQUALS, 70},
+        {TokenTypes::TS_BANG_EQUALS, 70},
+        {TokenTypes::TS_AMPERSAND_AMPERSAND, 80},
+        {TokenTypes::TS_PIPE_PIPE, 90},
+        {TokenTypes::TS_AMPERSAND, 100},
+        {TokenTypes::TS_PIPE, 110},
+        {TokenTypes::TS_CARET, 120},
+        {TokenTypes::TS_TILDE, 130},
+        {TokenTypes::TS_AMPERSAND_EQUALS, 140},
+        {TokenTypes::TS_PIPE_EQUALS, 150},
+        {TokenTypes::TS_CARET_EQUALS, 160},
+        {TokenTypes::TS_TILDE_EQUALS, 170},
+        {TokenTypes::TS_LEFT_SHIFT, 180},
+        {TokenTypes::TS_RIGHT_SHIFT, 180},
+        {TokenTypes::TS_LEFT_SHIFT_EQUALS, 190},
+        {TokenTypes::TS_RIGHT_SHIFT_EQUALS, 190},
+};
+
 class Token {
 private:
     TokenTypes type;
@@ -344,6 +387,10 @@ public:
 
     int getColumn() const {
         return column;
+    }
+
+    std::string *getValue() const {
+        return value;
     }
 
     std::string toString() const {

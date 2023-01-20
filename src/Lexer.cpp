@@ -188,5 +188,5 @@ Token Lexer::read() {
         return readKeywordIdentifier();
     }
 
-
+    return {TokenTypes::T_INVALID, line, column};
 }
